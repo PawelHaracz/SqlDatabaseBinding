@@ -1,7 +1,10 @@
-﻿namespace Pawelharacz.Webjobs.Extensions.MSSqlDatabase.Config
+﻿using System.Data.SqlClient;
+using Pawelharacz.Webjobs.Extensions.MSSqlDatabase.Service;
+
+namespace Pawelharacz.Webjobs.Extensions.MSSqlDatabase.Config
 {
     internal interface IMsSqlDbServiceFactory
     {
-        IMsSqlDbService CreateService(string connectionString);
+        IMsSqlDbService CreateService(SqlConnectionStringBuilder connectionString);
     }
 }

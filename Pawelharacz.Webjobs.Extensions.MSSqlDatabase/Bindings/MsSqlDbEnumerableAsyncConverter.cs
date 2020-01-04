@@ -7,12 +7,12 @@ using Pawelharacz.Webjobs.Extensions.MSSqlDatabase.Config;
 
 namespace Pawelharacz.Webjobs.Extensions.MSSqlDatabase.Bindings
 {
-    internal class MsSqlDbEnumerableBuilder<T> : IAsyncConverter<MsSqlDbAttribute, IEnumerable<T>>
+    internal class MsSqlDbEnumerableAsyncConverter<T> : IAsyncConverter<MsSqlDbAttribute, IEnumerable<T>>
         where T: class, new()
     {
         private readonly MsSqlDbExtensionConfigProvider _msSqlDbExtensionConfigProvider;
 
-        public MsSqlDbEnumerableBuilder(MsSqlDbExtensionConfigProvider msSqlDbExtensionConfigProvider)
+        public MsSqlDbEnumerableAsyncConverter(MsSqlDbExtensionConfigProvider msSqlDbExtensionConfigProvider)
         {
             _msSqlDbExtensionConfigProvider = msSqlDbExtensionConfigProvider;
         }
@@ -27,14 +27,18 @@ namespace Pawelharacz.Webjobs.Extensions.MSSqlDatabase.Bindings
                Query = input.SqlQuery
                
            };
-           
-           var objects = context.MsSqlDbService.GetAsync<T>(sqlSpec, cancellationToken);
            var list = new List<T>();
+#if NETCOREAPP3_1
+           var objects = context.MsSqlDbService.GetAsync<T>(sqlSpec, cancellationToken);
+           
            await foreach (var o in objects.WithCancellation(cancellationToken))
            {
                list.Add(o);
            }
-
+#else
+            var objects = await context.MsSqlDbService.GetAsync<T>(sqlSpec, cancellationToken);
+            list.AddRange(objects);
+#endif
            return list.AsEnumerable();
         }
     }

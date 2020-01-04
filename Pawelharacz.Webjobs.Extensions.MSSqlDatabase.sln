@@ -5,6 +5,8 @@ VisualStudioVersion = 15.0.26124.0
 MinimumVisualStudioVersion = 15.0.26124.0
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Pawelharacz.Webjobs.Extensions.MSSqlDatabase", "Pawelharacz.Webjobs.Extensions.MSSqlDatabase\Pawelharacz.Webjobs.Extensions.MSSqlDatabase.csproj", "{2E605B80-2A57-463C-99DC-5E1D6C170DE7}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Pawelharacz.SqlTest", "Pawelharacz.SqlTest\Pawelharacz.SqlTest.csproj", "{A728EFA6-1773-41C2-82C0-8CE9D92DA94C}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -30,5 +32,17 @@ Global
 		{2E605B80-2A57-463C-99DC-5E1D6C170DE7}.Release|x64.Build.0 = Release|Any CPU
 		{2E605B80-2A57-463C-99DC-5E1D6C170DE7}.Release|x86.ActiveCfg = Release|Any CPU
 		{2E605B80-2A57-463C-99DC-5E1D6C170DE7}.Release|x86.Build.0 = Release|Any CPU
+		{A728EFA6-1773-41C2-82C0-8CE9D92DA94C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{A728EFA6-1773-41C2-82C0-8CE9D92DA94C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{A728EFA6-1773-41C2-82C0-8CE9D92DA94C}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{A728EFA6-1773-41C2-82C0-8CE9D92DA94C}.Debug|x64.Build.0 = Debug|Any CPU
+		{A728EFA6-1773-41C2-82C0-8CE9D92DA94C}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{A728EFA6-1773-41C2-82C0-8CE9D92DA94C}.Debug|x86.Build.0 = Debug|Any CPU
+		{A728EFA6-1773-41C2-82C0-8CE9D92DA94C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{A728EFA6-1773-41C2-82C0-8CE9D92DA94C}.Release|Any CPU.Build.0 = Release|Any CPU
+		{A728EFA6-1773-41C2-82C0-8CE9D92DA94C}.Release|x64.ActiveCfg = Release|Any CPU
+		{A728EFA6-1773-41C2-82C0-8CE9D92DA94C}.Release|x64.Build.0 = Release|Any CPU
+		{A728EFA6-1773-41C2-82C0-8CE9D92DA94C}.Release|x86.ActiveCfg = Release|Any CPU
+		{A728EFA6-1773-41C2-82C0-8CE9D92DA94C}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal

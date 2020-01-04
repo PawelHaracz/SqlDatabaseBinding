@@ -1,5 +1,4 @@
-﻿using System.Collections;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Data.SqlClient;
 
 namespace Pawelharacz.Webjobs.Extensions.MSSqlDatabase

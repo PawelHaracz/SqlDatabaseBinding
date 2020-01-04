@@ -1,6 +1,8 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.Data.SqlClient;
 using Microsoft.Azure.WebJobs;
 using Microsoft.Azure.WebJobs.Description;
 using Microsoft.Azure.WebJobs.Host.Bindings;
@@ -9,6 +11,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Pawelharacz.Webjobs.Extensions.MSSqlDatabase.Bindings;
+using Pawelharacz.Webjobs.Extensions.MSSqlDatabase.Service;
 
 namespace Pawelharacz.Webjobs.Extensions.MSSqlDatabase.Config
 {
@@ -47,21 +50,33 @@ namespace Pawelharacz.Webjobs.Extensions.MSSqlDatabase.Config
             {
                 throw new ArgumentNullException(nameof(context));
             }
-            
             var rule = context.AddBindingRule<MsSqlDbAttribute>();
             rule.AddValidator(ValidateConnection);
-            rule.WhenIsNull(nameof(MsSqlDbAttribute.SqlQuery))
-                .BindToInput<IEnumerable<OpenType>>(typeof(MsSqlDbEnumerableBuilder<>), this);
-
+            rule.WhenIsNotNull(nameof(MsSqlDbAttribute.SqlQuery));
+            rule.BindToInput<IEnumerable<OpenType>>(typeof(MsSqlDbEnumerableAsyncConverter<>), this);
+            rule.BindToInput<OpenType>(typeof(MsSqlDbAsyncConverter<>), this);
         }
 
+        public MsSqlDbContext CreateContext(MsSqlDbAttribute input)
+        {
+            var resolvedConnectionString = ResolveConnectionString(input.ConnectionStringSetting);
+            var service = GetService(resolvedConnectionString);
+            
+            return new MsSqlDbContext()
+            {
+                Attribute = input,
+                MsSqlDbService = service
+            };
+        }
+        
         private void ValidateConnection(MsSqlDbAttribute attribute, Type paramType)
         {
             if (string.IsNullOrEmpty(_options.ConnectionString) &&
-                string.IsNullOrEmpty(attribute.ConnectionStringSetting))
+                string.IsNullOrEmpty(attribute.ConnectionStringSetting) &&
+                string.IsNullOrWhiteSpace(_defaultConnectionString))
             {
-                string attributeProperty = $"{nameof(MsSqlDbAttribute)}.{nameof(MsSqlDbAttribute.ConnectionStringSetting)}";
-                string optionsProperty = $"{nameof(MsSqlDbOptions)}.{nameof(MsSqlDbOptions.ConnectionString)}";
+                var attributeProperty = $"{nameof(MsSqlDbAttribute)}.{nameof(MsSqlDbAttribute.ConnectionStringSetting)}";
+                var optionsProperty = $"{nameof(MsSqlDbOptions)}.{nameof(MsSqlDbOptions.ConnectionString)}";
                 throw new InvalidOperationException(
                     $"The CosmosDB connection string must be set either via the '{Constants.DefaultConnectionStringName}' IConfiguration connection string, via the {attributeProperty} property or via {optionsProperty}.");
             }
@@ -86,22 +101,21 @@ namespace Pawelharacz.Webjobs.Extensions.MSSqlDatabase.Config
             return _defaultConnectionString;
         }
             
-        internal IMsSqlDbService GetService(string connectionString)
+        
+        private IMsSqlDbService GetService(string connectionString)
         {
-            return ClientCache.GetOrAdd(connectionString, _msSqlDbServiceFactory.CreateService);
+            return ClientCache.GetOrAdd(connectionString,
+                key => _msSqlDbServiceFactory.CreateService(CreateConnection(key)));
+        }
+
+        private SqlConnectionStringBuilder CreateConnection(string key)
+        {
+            return new SqlConnectionStringBuilder(key)
+            {
+                ConnectRetryCount = 3
+            };
         }
         
-        public MsSqlDbContext CreateContext(MsSqlDbAttribute input)
-        {
-            var resolvedConnectionString = ResolveConnectionString(input.ConnectionStringSetting);
-            var service = GetService(resolvedConnectionString);
-            
-            return new MsSqlDbContext()
-            {
-                Attribute = input,
-                MsSqlDbService = service
-            };
-
-        }
+        
     }
 }

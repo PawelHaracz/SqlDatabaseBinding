@@ -1,11 +1,13 @@
-﻿using System.Collections.Generic;
+﻿#if NETCOREAPP3_1
+using System.Collections.Generic;
 using System.Data;
 using System.Data.SqlClient;
 using System.Runtime.CompilerServices;
 using System.Threading;
+using System.Threading.Tasks;
 using Pawelharacz.Webjobs.Extensions.MSSqlDatabase.Extensions;
 
-namespace Pawelharacz.Webjobs.Extensions.MSSqlDatabase.Config
+namespace Pawelharacz.Webjobs.Extensions.MSSqlDatabase.Service.v3
 {
     public class MsSqlDbService: IMsSqlDbService
     {
@@ -47,5 +49,24 @@ namespace Pawelharacz.Webjobs.Extensions.MSSqlDatabase.Config
                 yield return reader.ConvertToObject<T>();
             }
         }
+
+        public async Task<T> GetOne<T>(MsSqlSpec msSqlSpec, CancellationToken cancellationToken = default) where T : class, new()
+        {
+            await using var connection = new SqlConnection(_connectionString);
+            var command = new SqlCommand(msSqlSpec.Query, connection);
+            foreach (var sqlParameter in msSqlSpec.Parameters)
+            {
+                command.Parameters.Add(sqlParameter);
+            }
+            await connection.OpenAsync(cancellationToken);
+            var reader =await command.ExecuteReaderAsync(CommandBehavior.CloseConnection, cancellationToken);
+            var isRead = await reader.ReadAsync(cancellationToken);
+            if (isRead)
+            {
+                return reader.ConvertToObject<T>();
+            }
+            return default(T);
+        }
     }
 }
+#endif

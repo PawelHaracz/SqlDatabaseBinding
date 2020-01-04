@@ -1,5 +1,4 @@
-﻿using System;
-using System.Data.SqlClient;
+﻿using System.Data.SqlClient;
 using Microsoft.Azure.WebJobs.Hosting;
 
 namespace Pawelharacz.Webjobs.Extensions.MSSqlDatabase.Config
@@ -8,11 +7,13 @@ namespace Pawelharacz.Webjobs.Extensions.MSSqlDatabase.Config
     {
         public string Format()
         {
+            //todo should concat a one connection string, if null that means can't be generated from default values
             if (string.IsNullOrWhiteSpace(ConnectionString))
             {
-                throw new ArgumentNullException(nameof(ConnectionString));
+                return null;
             }
-            var builder =   new SqlConnectionStringBuilder(ConnectionString);
+            
+            var builder = new SqlConnectionStringBuilder(ConnectionString);
 
             return builder.ToString();
         }

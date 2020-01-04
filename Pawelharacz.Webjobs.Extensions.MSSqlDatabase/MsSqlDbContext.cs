@@ -1,4 +1,5 @@
 ﻿using Pawelharacz.Webjobs.Extensions.MSSqlDatabase.Config;
+using Pawelharacz.Webjobs.Extensions.MSSqlDatabase.Service;
 
 namespace Pawelharacz.Webjobs.Extensions.MSSqlDatabase
 {
