@@ -47,6 +47,11 @@ jobs:
     #     packagesToPush: '$(Build.ArtifactStagingDirectory)/**/*.nupkg;!$(Build.ArtifactStagingDirectory)/**/*.symbols.nupkg'
     #     nuGetFeedType: 'external'
     #     publishFeedCredentials: 'Nuget.org'     
+- job: 
+  displayName: "Tag repository"
+  pool:
+   vmImage: 'windows-lates' 
+  steps:
     - task: GitHubTag@1
       inputs:
         githubEndpoint: 'PawelHaracz'
