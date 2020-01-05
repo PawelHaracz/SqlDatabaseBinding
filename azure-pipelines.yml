@@ -51,4 +51,4 @@ jobs:
       inputs:
         githubEndpoint: 'PawelHaracz'
         repositoryName: '$(Build.Repository.Name)'
-        tag: 'v$(GitVersion.NuGetVersion)'      
+        tag: 'v$(GitVersion.NuGetVersion)'
