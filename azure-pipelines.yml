@@ -20,6 +20,7 @@ jobs:
       inputs:
         runtime: 'core'
         configFilePath: '$(Build.BinariesDirectory)/GitVersion.yml'
+        
     - task: UseDotNet@2
       displayName: ".NET Core 3.1.x"
       inputs:
