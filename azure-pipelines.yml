@@ -6,16 +6,48 @@
 trigger:
 - master
 variables:
-  BuildKind: "Release"
+  BuildConfiguration: "Release"
 jobs:
 - job: 
   displayName: Build application
   pool:
    vmImage: 'ubuntu-latest' 
   steps:
+    - task: GitVersion@5
+      displayName: GitVersion 
+      inputs:
+        runtime: 'core'
+    - task: AzureKeyVault@1
+      inputs:
+        azureSubscription: 'Visual Studio Enterprise(5e73a2da-b3fe-4744-9b0b-a7709bf317f8)'
+        KeyVaultName: 'pawelharaczkey'
+        SecretsFilter: 'NugetApiKey'
     - task: DotNetCoreCLI@2
+      displayName: 'dotnet build'
       inputs:
         command: 'build'
         projects: '**/Pawelharacz.Webjobs.Extensions.MSSqlDatabase.csproj'
-        arguments: '-c $(BuildKind)'
+        arguments: '-c $(BuildConfiguration) /p:Version=$(GitVersion.NuGetVersion)'
+        versioningScheme: byBuildNumber
+    - task: DotNetCoreCLI@2
+      displayName: 'dotnet pack' 
+      inputs: 
+        command: pack
+        packagesToPack: '$(Parameters.projects)' 
+        nobuild: true 
+        versioningScheme: byEnvVar 
+        versionEnvVar: GitVersion.NuGetVersion
+    - task: DotNetCoreCLI@2
+      displayName: 'dotnet nuget push' 
+      inputs:
+        command: 'push'
+        packagesToPush: '$(Build.ArtifactStagingDirectory)/*.nupkg'
+        arguments: '-k $(NugetApiKey) -s https://api.nuget.org/v3/index.json'
+    - task: DotNetCoreCLI@2
+      inputs:
+        command: 'push'
+        packagesToPush: '$(Build.ArtifactStagingDirectory)/*.nupkg'
+        nuGetFeedType: 'external'
+        
+    
 
