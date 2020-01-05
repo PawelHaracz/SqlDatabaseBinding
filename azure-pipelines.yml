@@ -8,6 +8,7 @@ trigger:
 variables:
   BuildConfiguration: "Release"
   ProjectsPath :  '**/*.MSSqlDatabase.csproj'
+   
 jobs:
 - job: 
   displayName: Build application
@@ -46,6 +47,7 @@ jobs:
         packagesToPush: '$(Build.ArtifactStagingDirectory)/**/*.nupkg;!$(Build.ArtifactStagingDirectory)/**/*.symbols.nupkg'
         nuGetFeedType: 'external'
         publishFeedCredentials: 'Nuget.org'
+      condition: and(succeeded(), or(eq(variables['Build.SourceBranch'], 'refs/heads/master'), eq('true', variables['FORCE_PUSH_NUGET']))
     - task: git-tag-on-release-task@8
       inputs:
         staticTagName: '$(GitVersion.NuGetVersion)'
