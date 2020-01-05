@@ -21,7 +21,7 @@ jobs:
       displayName: 'dotnet build'
       inputs:
         command: 'build'
-        projects: '**/Pawelharacz.Webjobs.Extensions.MSSqlDatabase.csproj'
+        projects: '**/*.MSSqlDatabase.csproj'
         arguments: '-c $(BuildConfiguration) /p:Version=$(GitVersion.NuGetVersion)'
         versioningScheme: byBuildNumber
     - task: DotNetCoreCLI@2
