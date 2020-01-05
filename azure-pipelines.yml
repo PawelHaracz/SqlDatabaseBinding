@@ -19,7 +19,7 @@ jobs:
       displayName: GitVersion 
       inputs:
         runtime: 'core'
-    
+        preferBundledVersion: false
     - task: UseDotNet@2
       displayName: ".NET Core 3.1.x"
       inputs:
@@ -39,15 +39,16 @@ jobs:
         packagesToPack: $(ProjectsPath) 
         nobuild: true 
         versioningScheme: byEnvVar 
-        versionEnvVar: GitVersion.NuGetVersion
+        versionEnvVar: 
     - task: NuGetCommand@2
       displayName: 'Nuget push'
       inputs:
         command: 'push'
         packagesToPush: '$(Build.ArtifactStagingDirectory)/**/*.nupkg;!$(Build.ArtifactStagingDirectory)/**/*.symbols.nupkg'
         nuGetFeedType: 'external'
-        publishFeedCredentials: 'Nuget.org'
-      condition: and(succeeded(), or(eq(variables['Build.SourceBranch'], 'refs/heads/master'), eq('true', variables['FORCE_PUSH_NUGET']))
-    - task: git-tag-on-release-task@8
+        publishFeedCredentials: 'Nuget.org'     
+    - task: GitHubTag@1
       inputs:
-        staticTagName: '$(GitVersion.NuGetVersion)'
+        githubEndpoint: 'PawelHaracz'
+        repositoryName: '$(Build.Repository.Name)'
+        tag: 'v$(GitVersion.NuGetVersion)'      
