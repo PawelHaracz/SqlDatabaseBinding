@@ -50,7 +50,7 @@ jobs:
 - job: 
   displayName: "Tag repository"
   pool:
-   vmImage: 'windows-lates' 
+   vmImage: 'windows-latest' 
   steps:
     - task: GitHubTag@1
       inputs:
