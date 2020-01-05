@@ -17,11 +17,6 @@ jobs:
       displayName: GitVersion 
       inputs:
         runtime: 'core'
-    - task: AzureKeyVault@1
-      inputs:
-        azureSubscription: 'Visual Studio Enterprise(5e73a2da-b3fe-4744-9b0b-a7709bf317f8)'
-        KeyVaultName: 'pawelharaczkey'
-        SecretsFilter: 'NugetApiKey'
     - task: DotNetCoreCLI@2
       displayName: 'dotnet build'
       inputs:
@@ -38,16 +33,11 @@ jobs:
         versioningScheme: byEnvVar 
         versionEnvVar: GitVersion.NuGetVersion
     - task: DotNetCoreCLI@2
-      displayName: 'dotnet nuget push' 
-      inputs:
-        command: 'push'
-        packagesToPush: '$(Build.ArtifactStagingDirectory)/*.nupkg'
-        arguments: '-k $(NugetApiKey) -s https://api.nuget.org/v3/index.json'
-    - task: DotNetCoreCLI@2
+      displayName: 'dotnet nuget push'
       inputs:
         command: 'push'
         packagesToPush: '$(Build.ArtifactStagingDirectory)/*.nupkg'
         nuGetFeedType: 'external'
-        
+        publishFeedCredentials: 'Nuget.org'
     
 
