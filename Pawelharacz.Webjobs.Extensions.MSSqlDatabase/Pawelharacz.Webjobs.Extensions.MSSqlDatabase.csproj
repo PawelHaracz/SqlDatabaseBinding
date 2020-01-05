@@ -2,6 +2,10 @@
 
   <PropertyGroup>
     <TargetFrameworks>netcoreapp2;netstandard2.1;netcoreapp3.1</TargetFrameworks>
+    <PackageRequireLicenseAcceptance>false</PackageRequireLicenseAcceptance>
+    <GeneratePackageOnBuild>false</GeneratePackageOnBuild>
+    <Company>Pawel Haracz</Company>
+    <Description>the extension of the Azure functions which add Bindings to SQL</Description>
    
   </PropertyGroup>
   
@@ -16,17 +20,17 @@
   <ItemGroup>
     <PackageReference Include="FastMember" Version="1.5.0" />
     <PackageReference Include="Microsoft.Azure.WebJobs" Version="3.0.14" />
-    <PackageReference Include="Microsoft.Azure.WebJobs.Host.Storage" Version="3.0.14"/>
+    <PackageReference Include="Microsoft.Azure.WebJobs.Host.Storage" Version="3.0.14" />
   </ItemGroup>
   
   <ItemGroup Condition=" '$(TargetFramework)' == 'netcoreapp3.1' ">
     <PackageReference Include="System.Data.SqlClient" Version="4.8.0" />
-    <PackageReference Include="Microsoft.CSharp" Version="4.7.0"/>
+    <PackageReference Include="Microsoft.CSharp" Version="4.7.0" />
 
   </ItemGroup>
   <ItemGroup Condition=" '$(TargetFramework)' != 'netcoreapp3.1' ">
     <PackageReference Include="System.Data.SqlClient" Version="4.6.1" />
-    <PackageReference Include="Microsoft.CSharp" Version="4.5.0"/>
+    <PackageReference Include="Microsoft.CSharp" Version="4.5.0" />
   </ItemGroup>
 
 </Project>
