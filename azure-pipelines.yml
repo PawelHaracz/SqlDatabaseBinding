@@ -13,13 +13,14 @@ jobs:
 - job: 
   displayName: Build application
   pool:
-   vmImage: 'ubuntu-latest' 
+   vmImage: 'windows-latest' 
   steps:
     - task: GitVersion@5
       displayName: GitVersion 
       inputs:
         runtime: 'core'
         configFilePath: '$(Build.BinariesDirectory)/GitVersion.yml'
+        
     - task: UseDotNet@2
       displayName: ".NET Core 3.1.x"
       inputs:
@@ -46,7 +47,7 @@ jobs:
         command: 'push'
         packagesToPush: '$(Build.ArtifactStagingDirectory)/**/*.nupkg;!$(Build.ArtifactStagingDirectory)/**/*.symbols.nupkg'
         nuGetFeedType: 'external'
-        publishFeedCredentials: 'Nuget.org'     
+        publishFeedCredentials: 'Nuget.org'
     - task: GitHubTag@1
       inputs:
         githubEndpoint: 'PawelHaracz'
