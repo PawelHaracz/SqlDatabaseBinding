@@ -83,6 +83,28 @@ namespace Pawelharacz.Webjobs.Extensions.MSSqlDatabase.Service.v2
                 return default(T);
             }
         }
+
+        public async Task<IEnumerable<object>> GetAsync(MsSqlSpec msSqlSpec, CancellationToken cancellationToken = default)
+        {
+            using (var connection = new SqlConnection(_connectionString))
+            {
+                var command = new SqlCommand(msSqlSpec.Query, connection);
+                foreach (var sqlParameter in msSqlSpec.Parameters)
+                {
+                    command.Parameters.Add(sqlParameter);
+                }
+
+                await connection.OpenAsync(cancellationToken);
+                var reader = await command.ExecuteReaderAsync(CommandBehavior.CloseConnection, cancellationToken);
+                var list = new List<object>();
+                while (await reader.ReadAsync(cancellationToken))
+                {
+                    list.Add(reader.ConvertToObject());
+                }
+
+                return list.AsEnumerable();
+            }
+        }
     }
 }
 #endif

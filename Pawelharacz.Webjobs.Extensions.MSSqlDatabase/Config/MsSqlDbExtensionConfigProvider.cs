@@ -53,6 +53,8 @@ namespace Pawelharacz.Webjobs.Extensions.MSSqlDatabase.Config
             var rule = context.AddBindingRule<MsSqlDbAttribute>();
             rule.AddValidator(ValidateConnection);
             rule.WhenIsNotNull(nameof(MsSqlDbAttribute.SqlQuery));
+           
+            rule.BindToInput<IEnumerable<dynamic>>(typeof(MsSqlDbDynamicAsyncConverter), this);
             rule.BindToInput<IEnumerable<OpenType>>(typeof(MsSqlDbEnumerableAsyncConverter<>), this);
             rule.BindToInput<OpenType>(typeof(MsSqlDbAsyncConverter<>), this);
         }
