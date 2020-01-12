@@ -16,6 +16,7 @@ trigger:
   paths:
     exclude:
       - README.md
+      - azure-pipelines.yml
 variables:
   BuildConfiguration: "Release"
   ProjectsPath :  '**/*.MSSqlDatabase.csproj'
