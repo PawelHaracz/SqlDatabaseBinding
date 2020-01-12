@@ -1,5 +1,7 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Data.SqlClient;
+using System.Dynamic;
 using System.Linq;
 using FastMember;
 
@@ -14,7 +16,7 @@ namespace Pawelharacz.Webjobs.Extensions.MSSqlDatabase.Extensions
             var members = accessor.GetMembers();
             var t = new T();
 
-            for (int i = 0; i < rd.FieldCount; i++)
+            for (var i = 0; i < rd.FieldCount; i++)
             {
                 if (!rd.IsDBNull(i))
                 {
@@ -28,6 +30,23 @@ namespace Pawelharacz.Webjobs.Extensions.MSSqlDatabase.Extensions
             }
 
             return t;
+        }
+
+        public static object ConvertToObject(this SqlDataReader rd)
+        {
+            dynamic expando = new ExpandoObject();
+            var obj = expando as IDictionary<String, object>;
+            for (var i = 0; i < rd.FieldCount; i++)
+            {
+                if (!rd.IsDBNull(i))
+                {
+                    var fieldName = rd.GetName(i);
+                    
+                   obj[fieldName] = rd.GetValue(i);;    
+                }
+            }
+
+            return obj;
         }
     }
 }

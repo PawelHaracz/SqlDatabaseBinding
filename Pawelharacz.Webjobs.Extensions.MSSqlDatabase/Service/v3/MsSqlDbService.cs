@@ -43,10 +43,26 @@ namespace Pawelharacz.Webjobs.Extensions.MSSqlDatabase.Service.v3
                 command.Parameters.Add(sqlParameter);
             }
             await connection.OpenAsync(cancellationToken);
-            var reader =await command.ExecuteReaderAsync(CommandBehavior.CloseConnection, cancellationToken);
+            var reader = await command.ExecuteReaderAsync(CommandBehavior.CloseConnection, cancellationToken);
             while (await reader.ReadAsync(cancellationToken))
             {
                 yield return reader.ConvertToObject<T>();
+            }
+        }
+
+        public async IAsyncEnumerable<object> GetAsync(MsSqlSpec msSqlSpec, [EnumeratorCancellation] CancellationToken cancellationToken = default)
+        {
+            await using var connection = new SqlConnection(_connectionString);
+            var command = new SqlCommand(msSqlSpec.Query, connection);
+            foreach (var sqlParameter in msSqlSpec.Parameters)
+            {
+                command.Parameters.Add(sqlParameter);
+            }
+            await connection.OpenAsync(cancellationToken);
+            var reader = await command.ExecuteReaderAsync(CommandBehavior.CloseConnection, cancellationToken);
+            while (await reader.ReadAsync(cancellationToken))
+            {
+                yield return reader.ConvertToObject();
             }
         }
 
@@ -67,6 +83,7 @@ namespace Pawelharacz.Webjobs.Extensions.MSSqlDatabase.Service.v3
             }
             return default(T);
         }
+        
     }
 }
 #endif
