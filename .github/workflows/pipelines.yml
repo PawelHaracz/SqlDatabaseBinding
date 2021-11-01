@@ -1,9 +1,10 @@
-name: 'build and push to nuget'
+name: 'Build and push to nuget'
 on: 
   push:
     branches:
       - 'master'
-      - '!refs/tags/*'
+    tags-ignore:
+      - '*'
     paths-ignore:
       - 'README.md'
       - '.github/*'
