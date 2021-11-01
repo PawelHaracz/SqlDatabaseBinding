@@ -1,6 +1,5 @@
 name: 'Build and push to nuget'
 on: 
-  
   push:
     branches:
       - 'master'
@@ -12,7 +11,6 @@ on:
   pull_request:
     branches:
     - 'feature/*'
-  workflow_dispatch:
 
 jobs:
   build:
@@ -46,25 +44,3 @@ jobs:
       
       - name: Pack
         run: dotnet pack -p:Version=${{ steps.gitversion.outputs.nuGetVersion }} --no-build
-
-  # publish:
-  #   runs-on: 'windows-latest'
-  #   name: publish nuget
-  #   needs: [build]
-  #   if: ${{ success() }}
-  #   steps:
-  #     - task: NuGetCommand@2
-  #       displayName: 'Nuget push'
-  #       condition: and(succeeded(), eq(variables['Build.SourceBranch'], 'refs/heads/master'))
-  #       inputs:
-  #         command: 'push'
-  #         packagesToPush: '$(Build.ArtifactStagingDirectory)/**/*.nupkg;!$(Build.ArtifactStagingDirectory)/**/*.symbols.nupkg'
-  #         nuGetFeedType: 'external'
-  #         publishFeedCredentials: 'Nuget.org'
-  #     - task: GitHubTag@1
-  #       displayName: "Git Hub tag"
-  #       condition: and(succeeded(), eq(variables['Build.SourceBranch'], 'refs/heads/master'))
-  #       inputs:
-  #         githubEndpoint: 'PawelHaracz'
-  #         repositoryName: '$(Build.Repository.Name)'
-  #         tag: 'v$(GitVersion.NuGetVersion)'
