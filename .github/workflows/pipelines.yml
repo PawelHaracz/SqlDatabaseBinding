@@ -1,5 +1,6 @@
 name: 'Build and push to nuget'
 on: 
+  
   push:
     branches:
       - 'master'
@@ -11,6 +12,8 @@ on:
   pull_request:
     branches:
     - 'feature/*'
+  workflow_dispatch:
+  
 jobs:
   build:
     runs-on: 'windows-latest'
