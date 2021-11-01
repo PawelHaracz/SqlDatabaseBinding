@@ -24,7 +24,11 @@ jobs:
     name: Build application
     steps:
       - uses: actions/checkout@v2
-
+      - run: |
+          git fetch --tags
+          git branch --create-reflog master origin/master
+        name: fetch all tags
+        
       - name: Install GitVersion
         uses: gittools/actions/gitversion/setup@v0.9.7
         with:
