@@ -65,21 +65,18 @@ jobs:
         uses: actions/download-artifact@v2
         with:
           name: nupkg
+      
       - name: Push to NuGet Feed
         run: dotnet nuget push ./nupkg/*.nupkg --source $(NUGET_FEED) --skip-duplicate --api-key $(NUGET_KEY)
       
-      - task: NuGetCommand@2
-        displayName: "Nuget push"
-        condition: and(succeeded(), eq(variables['Build.SourceBranch'], 'refs/heads/master'))
-        inputs:
-          command: "push"
-          packagesToPush: "$(Build.ArtifactStagingDirectory)/**/*.nupkg;!$(Build.ArtifactStagingDirectory)/**/*.symbols.nupkg"
-          nuGetFeedType: "external"
-          publishFeedCredentials: "Nuget.org"
-      - task: GitHubTag@1
-        displayName: "Git Hub tag"
-        condition: and(succeeded(), eq(variables['Build.SourceBranch'], 'refs/heads/master'))
-        inputs:
-          githubEndpoint: "PawelHaracz"
-          repositoryName: "$(Build.Repository.Name)"
-          tag: "v${{ needs.build.outputs.gitVersion }}
+      - name: Create tag
+        uses: actions/github-script@v3
+        with:
+          github-token: ${{ github.token }}
+          script: |
+            github.git.createRef({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              ref: "refs/tags/v${{ needs.build.outputs.gitVersion }}",
+              sha: context.sha
+            })
