@@ -54,7 +54,7 @@ jobs:
         uses: 'actions/upload-artifact@v2'
         with:
             name: nupkg
-            path: '*.nupkg'
+            path: '**/*.nupkg'
   
   publish-package:
     runs-on: "windows-2019"
