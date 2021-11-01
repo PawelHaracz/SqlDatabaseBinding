@@ -51,13 +51,13 @@ jobs:
         shell: pwsh
 
       - name: Pack
-        run: dotnet pack -p:Version=${{steps.gitversion.outputs.nuGetVersion}} --no-build -o nuget/
+        run: dotnet pack -p:Version=${{steps.gitversion.outputs.nuGetVersion}} --no-build 
       
       - name: uplad artifacts   
         uses: 'actions/upload-artifact@v2'
         with:
             name: nupkg
-            path: ../nuget/*.nupkg
+            path: '*.nupkg'
   
   publish-package:
     runs-on: "windows-2019"
