@@ -11,7 +11,16 @@ on:
   pull_request:
     branches:
     - 'feature/*'
-
+  workflow_dispatch:
+    inputs:
+      name:
+        description: 'Person to greet'
+        required: true
+        default: 'Mona the Octocat'
+      home:
+        description: 'location'
+        required: false
+        default: 'The Octoverse'
 jobs:
   build:
     runs-on: 'windows-latest'
@@ -20,27 +29,49 @@ jobs:
       ProjectsPath :  '**/*.MSSqlDatabase.csproj'
     name: Build application
     steps:
-      - uses: actions/checkout@v2
-      
-      - name: Install GitVersion
-        uses: gittools/actions/gitversion/setup@v0.9.7
-        with:
-          versionSpec: '5.x'
+    - uses: actions/checkout@v2
+    
+    - name: Install GitVersion
+      uses: gittools/actions/gitversion/setup@v0.9.7
+      with:
+        versionSpec: '5.x'
 
-      - name: Determine Version
-        id:   gitversion
-        uses: gittools/actions/gitversion/execute@v0.9.7
-        with:
-          useConfigFile: true
-          configFilePath: SqlDatabaseBinding/GitVersion.yml
-                      
-      - name: Setup .NET
-        uses: actions/setup-dotnet@v1
-        with:
-          dotnet-version: 3.1.x
-      
-      - name: Build
-        run: dotnet build -c $(BuildConfiguration) -p:Version=${{ steps.gitversion.outputs.nuGetVersion }}  
-      
-      - name: Pack
-        run: dotnet pack -p:Version=${{ steps.gitversion.outputs.nuGetVersion }} --no-build
+    - name: Determine Version
+      id:   gitversion
+      uses: gittools/actions/gitversion/execute@v0.9.7
+      with:
+        useConfigFile: true
+        configFilePath: SqlDatabaseBinding/GitVersion.yml
+                    
+    - name: Setup .NET
+      uses: actions/setup-dotnet@v1
+      with:
+        dotnet-version: 3.1.x
+    
+    - name: Build
+      run: dotnet build -c $(BuildConfiguration) -p:Version=${{ steps.gitversion.outputs.nuGetVersion }}  
+    
+    - name: Pack
+      run: dotnet pack -p:Version=${{steps.gitversion.outputs.nuGetVersion}} --no-build
+
+  # publish:
+  #   runs-on: 'windows-latest'
+  #   name: publish nuget
+  #   needs: [build]
+  #   if: ${{ success() }}
+  #   steps:
+  #     - task: NuGetCommand@2
+  #       displayName: 'Nuget push'
+  #       condition: and(succeeded(), eq(variables['Build.SourceBranch'], 'refs/heads/master'))
+  #       inputs:
+  #         command: 'push'
+  #         packagesToPush: '$(Build.ArtifactStagingDirectory)/**/*.nupkg;!$(Build.ArtifactStagingDirectory)/**/*.symbols.nupkg'
+  #         nuGetFeedType: 'external'
+  #         publishFeedCredentials: 'Nuget.org'
+  #     - task: GitHubTag@1
+  #       displayName: "Git Hub tag"
+  #       condition: and(succeeded(), eq(variables['Build.SourceBranch'], 'refs/heads/master'))
+  #       inputs:
+  #         githubEndpoint: 'PawelHaracz'
+  #         repositoryName: '$(Build.Repository.Name)'
+  #         tag: 'v$(GitVersion.NuGetVersion)'
