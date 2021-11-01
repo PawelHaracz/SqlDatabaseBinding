@@ -7,7 +7,7 @@ on:
       - "*"
     paths-ignore:
       - "README.md"
-      - ".github/*"
+
   pull_request:
     branches:
       - "feature/*"
@@ -33,6 +33,9 @@ jobs:
       - name: Determine Version
         id: gitversion
         uses: gittools/actions/gitversion/execute@v0.9.7
+        with:
+          useConfigFile: true
+          configFilePath: GitVersion.yml
 
       - name: Setup .NET
         uses: actions/setup-dotnet@v1
@@ -44,11 +47,13 @@ jobs:
 
       - name: Pack
         run: dotnet pack -p:Version=${{steps.gitversion.outputs.nuGetVersion}} --no-build -o nuget/
+      
       - name: uplad artifacts   
         uses: 'actions/upload-artifact@v2'
         with:
             name: nupkg
             path: ../nuget/*.nupkg
+  
   publish-package:
     runs-on: "windows-2019"
     name: publish nuget

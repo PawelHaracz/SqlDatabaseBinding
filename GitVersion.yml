@@ -1,8 +1,13 @@
 mode: Mainline
-next-version: 0.2
+next-version: 0.3
 major-version-bump-message: '\+semver:\s?(breaking|major)'
 minor-version-bump-message: '\+semver:\s?(feature|minor)'
 patch-version-bump-message: '\+semver:\s?(fix|patch)'
 commit-message-incrementing: Enabled
 ignore:
   sha: []
+branches:
+  master:
+    regex: ^latest$
+  pull-request:
+    tag: pr
