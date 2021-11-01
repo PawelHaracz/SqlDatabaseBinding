@@ -11,55 +11,59 @@ on:
   pull_request:
     branches:
     - 'feature/*'
-
-variables:
-  BuildConfiguration: "Release"
-  ProjectsPath :  '**/*.MSSqlDatabase.csproj'
-   
 jobs:
-- job: 
-  displayName: Build application
-  pool:
-   vmImage: 'windows-latest' 
-  steps:
-    - task: GitVersion@5
-      displayName: GitVersion 
-      inputs:
-        runtime: 'core'
-        configFilePath: '$(Build.BinariesDirectory)/GitVersion.yml'
-        
-    - task: UseDotNet@2
-      displayName: ".NET Core 3.1.x"
-      inputs:
-        version: '3.1.x'
-        packageType: sdk
-    - task: DotNetCoreCLI@2
-      displayName: 'dotnet build'
-      inputs:
-        command: 'build'
-        projects: $(ProjectsPath)
-        arguments: '-c $(BuildConfiguration) /p:Version=$(GitVersion.NuGetVersion)'
-        versioningScheme: byBuildNumber
-    - task: DotNetCoreCLI@2
-      displayName: 'dotnet pack' 
-      inputs: 
-        command: pack
-        packagesToPack: $(ProjectsPath) 
-        nobuild: true 
-        versioningScheme: byEnvVar 
-        versionEnvVar: GitVersion.NuGetVersion
-    - task: NuGetCommand@2
-      displayName: 'Nuget push'
-      condition: and(succeeded(), eq(variables['Build.SourceBranch'], 'refs/heads/master'))
-      inputs:
-        command: 'push'
-        packagesToPush: '$(Build.ArtifactStagingDirectory)/**/*.nupkg;!$(Build.ArtifactStagingDirectory)/**/*.symbols.nupkg'
-        nuGetFeedType: 'external'
-        publishFeedCredentials: 'Nuget.org'
-    - task: GitHubTag@1
-      displayName: "Git Hub tag"
-      condition: and(succeeded(), eq(variables['Build.SourceBranch'], 'refs/heads/master'))
-      inputs:
-        githubEndpoint: 'PawelHaracz'
-        repositoryName: '$(Build.Repository.Name)'
-        tag: 'v$(GitVersion.NuGetVersion)'
+  build:
+    runs-on: 'windows-latest'
+    env:
+      BuildConfiguration: "Release"
+      ProjectsPath :  '**/*.MSSqlDatabase.csproj'
+    name: Build application
+    steps:
+      - task: GitVersion@5
+        displayName: GitVersion 
+        inputs:
+          runtime: 'core'
+          configFilePath: '$(Build.BinariesDirectory)/GitVersion.yml'
+          
+      - task: UseDotNet@2
+        displayName: ".NET Core 3.1.x"
+        inputs:
+          version: '3.1.x'
+          packageType: sdk
+      - task: DotNetCoreCLI@2
+        displayName: 'dotnet build'
+        inputs:
+          command: 'build'
+          projects: $(ProjectsPath)
+          arguments: '-c $(BuildConfiguration) /p:Version=$(GitVersion.NuGetVersion)'
+          versioningScheme: byBuildNumber
+      - task: DotNetCoreCLI@2
+        displayName: 'dotnet pack' 
+        inputs: 
+          command: pack
+          packagesToPack: $(ProjectsPath) 
+          nobuild: true 
+          versioningScheme: byEnvVar 
+          versionEnvVar: GitVersion.NuGetVersion
+          
+  publish:
+    runs-on: 'windows-latest'
+    name: publish nuget
+    needs: [build]
+    if: ${{ success() }}
+    steps:
+      - task: NuGetCommand@2
+        displayName: 'Nuget push'
+        condition: and(succeeded(), eq(variables['Build.SourceBranch'], 'refs/heads/master'))
+        inputs:
+          command: 'push'
+          packagesToPush: '$(Build.ArtifactStagingDirectory)/**/*.nupkg;!$(Build.ArtifactStagingDirectory)/**/*.symbols.nupkg'
+          nuGetFeedType: 'external'
+          publishFeedCredentials: 'Nuget.org'
+      - task: GitHubTag@1
+        displayName: "Git Hub tag"
+        condition: and(succeeded(), eq(variables['Build.SourceBranch'], 'refs/heads/master'))
+        inputs:
+          githubEndpoint: 'PawelHaracz'
+          repositoryName: '$(Build.Repository.Name)'
+          tag: 'v$(GitVersion.NuGetVersion)'
