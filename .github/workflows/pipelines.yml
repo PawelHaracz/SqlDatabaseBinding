@@ -71,7 +71,7 @@ jobs:
           name: nupkg
       
       - name: Push to NuGet Feed
-        run: dotnet nuget push ./nupkg/*.nupkg --source $ENV:NUGET_FEED --skip-duplicate --api-key $ENV:NUGET_KEY
+        run: dotnet nuget push ./nupkg/**/*.nupkg --source $ENV:NUGET_FEED --skip-duplicate --api-key $ENV:NUGET_KEY
         shell: pwsh
       
       - name: Create tag
