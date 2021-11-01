@@ -1,22 +1,16 @@
-# Starter pipeline
-# Start with a minimal pipeline that you can customize to build and deploy your code.
-# Add steps that build, run tests, deploy, and more:
-# https://aka.ms/yaml
+name: 'build and push to nuget'
+on: 
+  push:
+    branches:
+      - 'master'
+      - '!refs/tags/*'
+    paths-ignore:
+      - 'README.md'
+      - '.github/*'
+  pull_request:
+    branches:
+    - 'feature/*'
 
-pr:
-  branches:
-    include:
-      - feature/*
-trigger:
-  branches:
-    include:
-      - master
-    exclude:
-      -  refs/tags/*
-  paths:
-    exclude:
-      - README.md
-      - azure-pipelines.yml
 variables:
   BuildConfiguration: "Release"
   ProjectsPath :  '**/*.MSSqlDatabase.csproj'
