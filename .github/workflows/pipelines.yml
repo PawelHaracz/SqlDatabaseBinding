@@ -51,8 +51,9 @@ jobs:
         shell: pwsh
 
       - name: Pack
-        run: dotnet pack -p:Version=${{steps.gitversion.outputs.nuGetVersion}} --no-build 
-      
+        run: dotnet pack -p:Version=${{steps.gitversion.outputs.nuGetVersion}} --no-build Pawelharacz.Webjobs.Extensions.MSSqlDatabase//Pawelharacz.Webjobs.Extensions.MSSqlDatabase.csproj
+        shell: pwsh
+              
       - name: uplad artifacts   
         uses: 'actions/upload-artifact@v2'
         with:
