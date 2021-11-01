@@ -12,21 +12,15 @@ on:
     branches:
       - "feature/*"
   workflow_dispatch:
-    inputs:
-      name:
-        description: "Person to greet"
-        required: true
-        default: "Mona the Octocat"
-      home:
-        description: "location"
-        required: false
-        default: "The Octoverse"
+
 jobs:
-  build:
-    runs-on: "windows-latest"
+  build-package:
+    runs-on: "windows-2019"
     env:
       BuildConfiguration: "Release"
       ProjectsPath: "**/*.MSSqlDatabase.csproj"
+    outputs:
+      gitVersion: ${{ steps.gitversion.outputs.nuGetVersion }} 
     name: Build application
     steps:
       - uses: actions/checkout@v2
@@ -52,26 +46,40 @@ jobs:
         run: dotnet build -c $(BuildConfiguration) -p:Version=${{ steps.gitversion.outputs.nuGetVersion }}
 
       - name: Pack
-        run: dotnet pack -p:Version=${{steps.gitversion.outputs.nuGetVersion}} --no-build
-
-  # publish:
-  #   runs-on: 'windows-latest'
-  #   name: publish nuget
-  #   needs: [build]
-  #   if: ${{ success() }}
-  #   steps:
-  #     - task: NuGetCommand@2
-  #       displayName: 'Nuget push'
-  #       condition: and(succeeded(), eq(variables['Build.SourceBranch'], 'refs/heads/master'))
-  #       inputs:
-  #         command: 'push'
-  #         packagesToPush: '$(Build.ArtifactStagingDirectory)/**/*.nupkg;!$(Build.ArtifactStagingDirectory)/**/*.symbols.nupkg'
-  #         nuGetFeedType: 'external'
-  #         publishFeedCredentials: 'Nuget.org'
-  #     - task: GitHubTag@1
-  #       displayName: "Git Hub tag"
-  #       condition: and(succeeded(), eq(variables['Build.SourceBranch'], 'refs/heads/master'))
-  #       inputs:
-  #         githubEndpoint: 'PawelHaracz'
-  #         repositoryName: '$(Build.Repository.Name)'
-  #         tag: 'v$(GitVersion.NuGetVersion)'
+        run: dotnet pack -p:Version=${{steps.gitversion.outputs.nuGetVersion}} --no-build -o nuget/
+      - name: uplad artifacts   
+        uses: 'actions/upload-artifact@v2'
+        with:
+            name: nupkg
+            path: ../nuget/*.nupkg
+  publish-package:
+    runs-on: "windows-2019"
+    name: publish nuget
+    needs: build-package
+    env:
+      NUGET_FEED: https://api.nuget.org/v3/index.json
+      NUGET_KEY: ${{ secrets.NUGET_KEY }}
+    if: ${{ success() }}
+    steps:
+      - name: Download Artifact
+        uses: actions/download-artifact@v2
+        with:
+          name: nupkg
+      - name: Push to NuGet Feed
+        run: dotnet nuget push ./nupkg/*.nupkg --source $(NUGET_FEED) --skip-duplicate --api-key $(NUGET_KEY)
+      
+      - task: NuGetCommand@2
+        displayName: "Nuget push"
+        condition: and(succeeded(), eq(variables['Build.SourceBranch'], 'refs/heads/master'))
+        inputs:
+          command: "push"
+          packagesToPush: "$(Build.ArtifactStagingDirectory)/**/*.nupkg;!$(Build.ArtifactStagingDirectory)/**/*.symbols.nupkg"
+          nuGetFeedType: "external"
+          publishFeedCredentials: "Nuget.org"
+      - task: GitHubTag@1
+        displayName: "Git Hub tag"
+        condition: and(succeeded(), eq(variables['Build.SourceBranch'], 'refs/heads/master'))
+        inputs:
+          githubEndpoint: "PawelHaracz"
+          repositoryName: "$(Build.Repository.Name)"
+          tag: "v${{ needs.build.outputs.gitVersion }}
