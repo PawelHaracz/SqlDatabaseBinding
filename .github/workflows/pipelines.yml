@@ -35,7 +35,7 @@ jobs:
         uses: gittools/actions/gitversion/execute@v0.9.7
         with:
           useConfigFile: true
-          configFilePath: SqlDatabaseBinding/GitVersion.yml
+          configFilePath: GitVersion.yml
 
       - name: Setup .NET
         uses: actions/setup-dotnet@v1
