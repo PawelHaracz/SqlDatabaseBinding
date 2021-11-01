@@ -1,58 +1,58 @@
-name: 'Build and push to nuget'
-on: 
+name: "Build and push to nuget"
+on:
   push:
     branches:
-      - 'master'
+      - "master"
     tags-ignore:
-      - '*'
+      - "*"
     paths-ignore:
-      - 'README.md'
-      - '.github/*'
+      - "README.md"
+      - ".github/*"
   pull_request:
     branches:
-    - 'feature/*'
+      - "feature/*"
   workflow_dispatch:
     inputs:
       name:
-        description: 'Person to greet'
+        description: "Person to greet"
         required: true
-        default: 'Mona the Octocat'
+        default: "Mona the Octocat"
       home:
-        description: 'location'
+        description: "location"
         required: false
-        default: 'The Octoverse'
+        default: "The Octoverse"
 jobs:
   build:
-    runs-on: 'windows-latest'
+    runs-on: "windows-latest"
     env:
       BuildConfiguration: "Release"
-      ProjectsPath :  '**/*.MSSqlDatabase.csproj'
+      ProjectsPath: "**/*.MSSqlDatabase.csproj"
     name: Build application
     steps:
-    - uses: actions/checkout@v2
-    
-    - name: Install GitVersion
-      uses: gittools/actions/gitversion/setup@v0.9.7
-      with:
-        versionSpec: '5.x'
+      - uses: actions/checkout@v2
 
-    - name: Determine Version
-      id:   gitversion
-      uses: gittools/actions/gitversion/execute@v0.9.7
-      with:
-        useConfigFile: true
-        configFilePath: SqlDatabaseBinding/GitVersion.yml
-                    
-    - name: Setup .NET
-      uses: actions/setup-dotnet@v1
-      with:
-        dotnet-version: 3.1.x
-    
-    - name: Build
-      run: dotnet build -c $(BuildConfiguration) -p:Version=${{ steps.gitversion.outputs.nuGetVersion }}  
-    
-    - name: Pack
-      run: dotnet pack -p:Version=${{steps.gitversion.outputs.nuGetVersion}} --no-build
+      - name: Install GitVersion
+        uses: gittools/actions/gitversion/setup@v0.9.7
+        with:
+          versionSpec: "5.x"
+
+      - name: Determine Version
+        id: gitversion
+        uses: gittools/actions/gitversion/execute@v0.9.7
+        with:
+          useConfigFile: true
+          configFilePath: SqlDatabaseBinding/GitVersion.yml
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v1
+        with:
+          dotnet-version: 3.1.x
+
+      - name: Build
+        run: dotnet build -c $(BuildConfiguration) -p:Version=${{ steps.gitversion.outputs.nuGetVersion }}
+
+      - name: Pack
+        run: dotnet pack -p:Version=${{steps.gitversion.outputs.nuGetVersion}} --no-build
 
   # publish:
   #   runs-on: 'windows-latest'
