@@ -1,0 +1,87 @@
+name: "Build and push to nuget"
+on:
+  push:
+    branches:
+      - "master"
+    tags-ignore:
+      - "*"
+    paths-ignore:
+      - "README.md"
+
+  pull_request:
+    branches:
+      - "*"
+  workflow_dispatch:
+
+jobs:
+  build-package:
+    runs-on: "windows-2019"
+    env:
+      BuildConfiguration: "Release"
+      ProjectsPath: "**/*.MSSqlDatabase.csproj"
+    outputs:
+      gitVersion: ${{ steps.gitversion.outputs.nuGetVersion }} 
+    name: Build application
+    steps:
+      - uses: actions/checkout@v2
+      - run: |
+          git fetch --tags
+          git branch --create-reflog master origin/master
+        name: fetch all tags
+        
+      - name: Install GitVersion
+        uses: gittools/actions/gitversion/setup@v0.9.7
+        with:
+          versionSpec: "5.x"
+
+      - name: Determine Version
+        id: gitversion
+        uses: gittools/actions/gitversion/execute@v0.9.7
+        with:
+          useConfigFile: true
+          configFilePath: GitVersion.yml
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v1
+        with:
+          dotnet-version: 3.1.x
+
+      - name: 'Build and Pack'
+        run: dotnet pack -p:Version=${{steps.gitversion.outputs.nuGetVersion}} -c $ENV:BuildConfiguration  Pawelharacz.Webjobs.Extensions.MSSqlDatabase//Pawelharacz.Webjobs.Extensions.MSSqlDatabase.csproj
+        shell: pwsh
+
+      - name: uplad artifacts   
+        uses: 'actions/upload-artifact@v2'
+        with:
+            name: nupkg
+            path: '**/*.nupkg'
+  
+  publish-package:
+    runs-on: "windows-2019"
+    name: publish nuget
+    needs: build-package
+    env:
+      NUGET_FEED: https://api.nuget.org/v3/index.json
+      NUGET_KEY: ${{ secrets.NUGET_KEY }}
+    if: ${{ success() }}
+    steps:
+      - name: Download Artifact
+        uses: actions/download-artifact@v2
+        with:
+          name: nupkg
+      
+      - name: Push to NuGet Feed
+        run: dotnet nuget push **/*.nupkg --source $ENV:NUGET_FEED --skip-duplicate --api-key $ENV:NUGET_KEY
+        shell: pwsh
+      
+      - name: Create tag
+        uses: actions/github-script@v3
+        with:
+          github-token: ${{ github.token }}
+          script: |
+            github.git.createRef({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              ref: "refs/tags/v${{ needs.build.outputs.gitVersion }}",
+              sha: context.sha
+            })
