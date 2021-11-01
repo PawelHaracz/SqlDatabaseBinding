@@ -25,8 +25,9 @@ jobs:
     steps:
       - uses: actions/checkout@v2
       - run: |
-          git fetch --tags
-        name: fetch all tags
+          git fetch --tags 
+          git fetch --unshallow
+        name: fetch all tags and branches
       - run: git branch --create-reflog master origin/master
         name: git reflog 
         if: ${{ github.event_name == 'pull_request' }}
